@@ -18,7 +18,7 @@ pipeline {
             steps {
                 echo 'Releasing Nexus'
                 sh 'cd webapp && zip dist-${BUILD_NUMBER}.zip -r dist'
-                sh 'cd webapp && curl -v -u gopalarao:gopal --upload-file dist-${BUILD_NUMBER}.zip http://18.61.42.237:8081/repository/lms-artifact/'
+                sh 'cd webapp && curl -v -u admin:gopal --upload-file dist-${BUILD_NUMBER}.zip http://18.61.42.237:8081/repository/lms-artifact/'
             }
         }
     }
