@@ -11,7 +11,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
-                sh 'cd webapp && sudo docker container run --rm -e SONAR_HOST_URL="http://http://18.60.85.16:9000" -e SONAR_LOGIN="sqp_f1990f2f11a0ca5c0c69b32d7df89dd1d67593c2" --volume ".:/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=lms-cicd'
+                sh 'cd webapp && sudo docker container run --rm -e SONAR_HOST_URL="http://http://18.60.85.16:9000" -e SONAR_LOGIN="sqp_0ea25d8e10a0c2fdd27b5c077a6ef026cbd56fa5" --volume ".:/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=lms-cicd'
             }
         }
         stage('Releasing') {
