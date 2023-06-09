@@ -21,7 +21,7 @@ pipeline {
                 sh 'cd webapp && curl -v -u admin:gopal --upload-file dist-${BUILD_NUMBER}.zip http://18.61.28.36:8081//repository/lms/'
                 sh 'cd'
                 sh 'curl -u admin:gopal -X GET http://18.61.28.36:8081/repository/lms/dist-${BUILD_NUMBER}.zip --output dist-${BUILD_NUMBER}.zip'
-                sh 'unzip dist-${BUILD_NUMBER}.zip dist/'
+                sh 'unzip dist-${BUILD_NUMBER}.zip dist'
                 sh 'sudo docker container run -dt --name original -p 8082:80 --volume /home/ubuntu/dist:/usr/share/nginx/html nginx'
 
 
