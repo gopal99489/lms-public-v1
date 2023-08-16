@@ -9,30 +9,29 @@ pipeline {
             }
         }
 
-      
         stage('Releasing') {
             steps {
                 echo 'Releasing Nexus'
-                sh 'cd webapp && zip dist-${BUILD_NUMBER}.zip -r dist/'
-                sh 'cd webapp && curl -v -u admin:gopal --upload-file dist-${BUILD_NUMBER}.zip http://15.206.210.7:8081/repository/lms/'
-                sh 'cd'
-                sh 'curl -u admin:gopal -X GET http://15.206.210.7:8081/repository/lms/dist-${BUILD_NUMBER}.zip --output dist-${BUILD_NUMBER}.zip'
-                sh 'unzip dist-${BUILD_NUMBER}.zip dist'
-                sh 'sudo docker container run -dt --name original -p 8082:80 --volume /home/ubuntu/dist:/usr/share/nginx/html nginx
+                sh "cd webapp && zip dist-\${BUILD_NUMBER}.zip -r dist/"
+                sh "cd webapp && curl -v -u admin:gopal --upload-file dist-\${BUILD_NUMBER}.zip http://15.206.210.7:8081/repository/lms/"
+                sh "curl -u admin:gopal -X GET http://15.206.210.7:8081/repository/lms/dist-\${BUILD_NUMBER}.zip --output dist-\${BUILD_NUMBER}.zip"
+                sh "unzip dist-\${BUILD_NUMBER}.zip -d dist"
+                sh "sudo docker container run -dt --name original -p 8082:80 --volume /home/ubuntu/dist:/usr/share/nginx/html nginx"
+            }
+        }
 
-              
-              stage('Deploy LMS') {
+        stage('Deploy LMS') {
             steps {
                 script {
                     echo "Deploying.."
                     def packageJSON = readJSON file: 'webapp/package.json'
                     def packageJSONVersion = packageJSON.version
                     echo "${packageJSONVersion}"
-                    sh "curl -u admin:gopal -X GET \'http:/15.206.210.7/:8081/repository/lms/dist-${packageJSONVersion}.zip\' --output dist-'${packageJSONVersion}'.zip"
+                    sh "curl -u admin:gopal -X GET 'http://15.206.210.7:8081/repository/lms/dist-${packageJSONVersion}.zip' --output dist-'${packageJSONVersion}'.zip"
                     sh 'sudo rm -rf /var/www/html/*'
                     sh "sudo unzip -o dist-'${packageJSONVersion}'.zip"
                     sh "sudo cp -r webapp/dist/* /var/www/html"
-
+                }
             }
         }
     }
