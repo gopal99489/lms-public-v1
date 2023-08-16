@@ -1,25 +1,30 @@
 pipeline {
     agent any
-
     stages {
-        stage('Build') {
+        stage('Sonar Analysis') {
+            steps {
+                echo 'Testing..'
+                sh 'cd webapp && sudo docker run  --rm -e SONAR_HOST_URL="http://15.206.210.7:9000" -e SONAR_LOGIN="sqp_f33ed664b6a5cbc1e13159c2aea42bbb3247f5bd"  -v ".:/usr/src" sonarsource/sonar-scanner-cli -Dsonar.projectKey=lms-frontend'
+            }
+        }
+        stage('Build LMS') {
             steps {
                 echo 'Building..'
                 sh 'cd webapp && npm install && npm run build'
             }
         }
-
-        stage('Releasing') {
+        stage('Release LMS') {
             steps {
-                echo 'Releasing Nexus'
-                sh "cd webapp && zip dist-\${BUILD_NUMBER}.zip -r dist/"
-                sh "cd webapp && curl -v -u admin:gopal --upload-file dist-\${BUILD_NUMBER}.zip http://15.206.210.7:8081/repository/lms/"
-                sh "curl -u admin:gopal -X GET http://15.206.210.7:8081/repository/lms/dist-\${BUILD_NUMBER}.zip --output dist-\${BUILD_NUMBER}.zip"
-                sh "unzip dist-\${BUILD_NUMBER}.zip -d dist"
-                sh "sudo docker container run -dt --name original -p 8082:80 --volume /home/ubuntu/dist:/usr/share/nginx/html nginx"
+                script {
+                    echo "Releasing.."
+                    def packageJSON = readJSON file: 'webapp/package.json'
+                    def packageJSONVersion = packageJSON.version
+                    echo "${packageJSONVersion}"
+                    sh "zip webapp/dist-${packageJSONVersion}.zip -r webapp/dist"
+                    sh "curl -v -u admin:gopal --upload-file webapp/dist-${packageJSONVersion}.zip http://15.206.210.7:8081/repository/lms/"
+            }
             }
         }
-
         stage('Deploy LMS') {
             steps {
                 script {
@@ -27,11 +32,11 @@ pipeline {
                     def packageJSON = readJSON file: 'webapp/package.json'
                     def packageJSONVersion = packageJSON.version
                     echo "${packageJSONVersion}"
-                    sh "curl -u admin:gopal -X GET 'http://15.206.210.7:8081/repository/lms/dist-${packageJSONVersion}.zip' --output dist-'${packageJSONVersion}'.zip"
+                    sh "curl -u admin:gopal -X GET \'http://15.206.210.7:8081/repository/lms/dist-${packageJSONVersion}.zip\' --output dist-'${packageJSONVersion}'.zip"
                     sh 'sudo rm -rf /var/www/html/*'
                     sh "sudo unzip -o dist-'${packageJSONVersion}'.zip"
                     sh "sudo cp -r webapp/dist/* /var/www/html"
-                }
+            }
             }
         }
     }
