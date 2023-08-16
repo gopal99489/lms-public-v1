@@ -36,6 +36,8 @@ pipeline {
                     sh 'sudo rm -rf /var/www/html/*'
                     sh "sudo unzip -o dist-'${packageJSONVersion}'.zip"
                     sh "sudo cp -r webapp/dist/* /var/www/html"
+                    sh sudo docker container run -dt --name ${packageJSONVersion} -p 8082:80 --volume /home/ubuntu/red/dist:/usr/share/nginx/html nginx
+
             }
             }
         }
